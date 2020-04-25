@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>挂号信息</title>
+    <link th:include="comm/head :: copy"/>
+</head>
+<body style="margin: 1px">
+
+<table id="dg" title="" class="easyui-datagrid"
+       fitColumns="true" pagination="true" rownumbers="true"
+       fit="true" toolbar="#tb"  striped="true" >
+    <thead>
+    <th field="ss" width="20" align="center"checkbox="true"></th>
+    <th field="id" width="20" align="center" hidden="true">编号</th>
+    <th field="dname" width="50" align="center">医生</th>
+    <th field="sdate" width="100" align="center">值班时间</th>
+    <th field="climit" width="50" align="center">总号</th>
+    <th field="yuhao" width="50" align="center">剩余号</th>
+    <th field="bb" width="50" align="center" formatter="formatOperation">操作</th>
+    </thead>
+</table>
+
+<div id="tb">
+    <div style="display: inline-block">
+        <form id="fms">
+            <span iconCls="icon-add">科室</span>
+            <select id="deptid" name="deptid" required="true" style="width:200px;">
+            </select>
+            <span iconCls="icon-add">主治医生</span>
+            <select id="position" name="position" required="true" style="width:200px;">
+                <option value='挂号类型'>挂号类型</option>
+                <option value='专家'>专家</option>
+                <option value='普通'>普通</option>
+            </select>
+            <a href="javascript:search()" class="easyui-linkbutton" iconCls="icon-search" plain="true">查询</a>
+        </form>
+    </div>
+</div>
+
+<div id="dlg" class="easyui-dialog" style="width: 320px;height: 200px;padding: 10px 20px"
+     closed="true" buttons="#dlg-buttons" data-options="onClose:function(){}" modal="true">
+    <form id="fm" method="post">
+        <input id="id" name="id" type="hidden">
+        <input id="docid" name="docid" type="hidden">
+        <input id="did" name="did" type="hidden">
+        <input id="ddid" name="ddid" type="hidden">
+        <input id="sdate" name="sdate" type="hidden"/>
+        <table cellspacing="8px">
+            <tr>
+                <td>患者姓名：</td>
+                <td>
+                    <input type="text" id="patientname" name="patientname" class="easyui-validatebox" required="true" style="width: 100px;"/>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<!--显示我的预约信息-->
+
+<div id="dlg-buttons">
+    <a href="javascript:saveRegs()" class="easyui-linkbutton" iconCls="icon-ok" style="display: inline-block;width: 100px;">马上预约</a>
+    <a href="javascript:closeInfo()" class="easyui-linkbutton" iconCls="icon-cancel" >取消</a>
+</div>
+</body>
+
+<script type="text/javascript">
+    function closeInfo(){
+        $("#dlg").dialog("close");
+    }
+    $(document).ready(function() {
+        $.get("/doctor/dept",function(data){
+            console.log(data);
+            var str = "<option value='data.rows[i].id'>请选择科室</option>";
+            //遍历数据
+            console.log(data);
+            for( var i=0; i<data.rows.length; i++){
+                str +="<option value='"+data.rows[i].id+"'>"+data.rows[i].name+"</option>";
+                console.log(data.rows[i].id);
+            }
+            $("#deptid").append(str);
+        },"json");
+    });
+
+    //弹出预约窗口
+    function addInfo(index){
+        $("#dg").datagrid("clearSelections");
+        $("#dg").datagrid("selectRow",index);
+        var row = $("#dg").datagrid("getSelected");
+        $("#dlg").dialog("open").dialog("setTitle","在线预约");
+        $("#fm").form("load",row);
+    }
+    //保存新增预约
+    function saveRegs(){
+        $("#fm").form("submit",{
+            url:"/make/regist/save",
+            onSubmit:function(){
+                return $(this).form("validate");
+            },
+            success:function(result){
+                var result=eval('('+result+')');
+                if(result.success){
+                    $.messager.alert('挂号结果：',result.msg);
+                    $("#dlg").dialog("close");
+                    $("#dg").datagrid("reload");
+                }else{
+                    $("#dlg").dialog("close");
+                    $.messager.alert('提示信息：',result.msg);
+                }
+            }
+        });
+    }
+
+    //根据条件查询可预约日期的值班医生
+    function search(){
+        $("#dg").datagrid('load',{
+            'deptid':$("#deptid").val(),
+            'position':$("#position").val()
+        });
+        $("#dg").datagrid({
+            url:"/make/regist/list1",
+            method:'get',
+        });
+    }
+
+    function formatOperation(val,row,index){
+        console.log("val"+val)
+        console.log("row"+row)
+        console.log("index"+index)
+        return "<a href=\"javascript:addInfo("+index+")\" class=\"easyui-linkbutton\" iconCls=\"icon-add\" plain=\"true\"><span class=\"l-btn-left l-btn-icon-left\"><span class=\"l-btn-text\" style='color: black'>在线预约</span><span class=\"l-btn-icon icon-add\">&nbsp;</span></span></a>"
+    }
+
+
+</script>
+</html>

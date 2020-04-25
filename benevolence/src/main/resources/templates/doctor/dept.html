@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>科室管理</title>
+	<link th:include="comm/head :: copy">
+</head>
+<body style="margin: 1px">
+<table id="dg" title="科室管理" class="easyui-datagrid"
+	   fitColumns="true" pagination="true" rownumbers="true"
+	   url=/sys/dept fit="true" toolbar="#tb" >
+
+	<thead>
+	<th field="ck" width="20" align="center" checkbox="true"></th>
+	<th field="id" width="20" align="center" hidden="true">编号</th>
+	<th field="name" width="50" align="center">名称</th>
+	<th field="area" width="50" align="center">地址</th>
+	<th field="phone" width="50" align="center">电话</th>
+	<th field="description" width="100" align="center">备注</th>
+	<th field="aa" width="50" align="center" formatter="formatEdit">操作</th>
+	</thead>
+</table>
+
+<div id="tb">
+	<div>
+		<a href="javascript:openDeptAdd()" class="easyui-linkbutton" iconCls="icon-add" plain="true">添加</a>
+		<a href="javascript:delAll()" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>
+	</div>
+	<div>
+		&nbsp;部门名称：&nbsp;<input type="text" id="s_deptName" size="20" onkeydown="if(event.keyCode==13) searchDept()"/>
+		<a href="javascript:searchDept()" class="easyui-linkbutton" iconCls="icon-search" plain="true">搜索</a>
+	</div>
+</div>
+
+
+<div id="dlg" class="easyui-dialog" style="width: 490px;height: 350px;padding: 10px 20px"
+	 closed="true" buttons="#dlg-buttons" data-options="onClose:function(){resetValue()}">
+	<form id="fm" method="post">
+		<input type="hidden" name="id" id="id">
+		<table cellspacing="8px">
+			<tr>
+				<td>部门名称：</td>
+				<td>
+					<input type="text" id="name" name="name" class="easyui-validatebox" required="true"/>
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">部门地址：</td>
+				<td>
+					<input type="text" rows="5" cols="40" id="area" name="area"></textarea>
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">部门电话：</td>
+				<td>
+					<input type="text" rows="5" cols="40" id="phone" name="phone"></textarea>
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">备注：</td>
+				<td>
+					<textarea rows="5" cols="40" id="description" name="description"></textarea>
+				</td>
+			</tr>
+		</table>
+	</form>
+</div>
+
+<div id="dlg-buttons">
+	<a href="javascript:saveDept()" class="easyui-linkbutton primary" >保存</a>
+	<a href="javascript:closeDept()" class="easyui-linkbutton">关闭</a>
+</div>
+
+</body>
+<script type="text/javascript">
+
+	function formatEdit(value,row,index){
+		var str;
+		str="<a href=\"javascript:editFun("+index+")\" class='dept-easyui-linkbutton-edit'>修改</a>"
+		str+="<a href=\"javascript:delFun("+row.id+")\" class='dept-easyui-linkbutton-del'>删除</a>"
+		return str;
+	}
+
+	$("#dg").datagrid({
+		onLoadSuccess: function (data) {
+			$('.dept-easyui-linkbutton-edit').linkbutton({text: '修改', plain: true, iconCls: 'fa fa-paint-brush'});
+			$('.dept-easyui-linkbutton-del').linkbutton({text: '删除', plain: true, iconCls: 'fa fa-trash'});
+			$('#dg').datagrid('fixRowHeight');
+		}
+	});
+	function searchDept(){
+		$("#dg").datagrid('load',{
+			"name":$("#s_deptName").val()
+		});
+	}
+
+	function resetValue(){
+		$('#fm').form('clear');
+	}
+
+	function closeDept(){
+		$("#dlg").dialog("close");
+		resetValue();
+	}
+
+	function saveDept(){
+		$("#fm").form("submit",{
+			url:"/doctor/doctor/deptSave",
+			onSubmit:function(){
+				return $(this).form("validate");
+			},
+			success:function(result){
+				var result=eval('('+result+')');
+				if(result.success){
+					message("保存成功!");
+					// $.messager.alert("系统提示","保存成功！");
+					resetValue();
+					$("#dlg").dialog("close");
+					$("#dg").datagrid("reload");
+				}else{
+					message(result.msg);
+					// $.messager.alert("系统提示",result.errorInfo);
+				}
+			}
+		});
+	}
+
+	function openDeptAdd(){
+		$("#dlg").dialog("open").dialog("setTitle","添加科室信息");
+		$('#fm').form('clear');	}
+
+	function editFun(index){
+		$('#dg').datagrid("clearSelections");
+		$('#dg').datagrid("selectRow",index);
+		var row=$('#dg').datagrid("getSelected");
+		$("#dlg").dialog("open").dialog("setTitle","修改角色信息");
+		$("#fm").form("load",row);
+	}
+
+	function delFun(id){
+		$.messager.confirm("系统提示","您确定要删除这条数据吗?",function(r){
+			if(r){
+				$.post("/doctor/doctor/deptDel",{id:id},function(result){
+					if(result.success){
+						message("数据已成功删除");
+						$("#dg").datagrid("reload");
+					}else{
+						message(result.msg);
+					}
+				},"json");
+			}
+		});
+	}
+
+	//批量删除
+	function delAll(){
+		var selectedRows=$("#dg").datagrid("getSelections");
+		if(selectedRows.length<1){
+			$.messager.alert("系统提示","至少请选择一条要删除的数据！");
+			return;
+		}
+		const ids=selectedRows.map(item =>{
+			return item.id;
+		})
+		// var id=selectedRows[0].id;
+		$.messager.confirm("系统提示","您确定要删除这些数据吗?",function(r){
+			if(r){
+				$.post("/tri/dept/deleteAll",{ids:ids.join(",")},function(result){
+					if(result.success){
+						message("数据已成功删除")
+						// $.messager.alert("系统提示","数据已成功删除！");
+						$("#dg").datagrid("reload");
+					}else{
+						message(result.msg)
+						// $.messager.alert("系统提示",result.errorInfo);
+					}
+				},"json");
+			}
+		});
+	}
+
+	$(document).ready(function() {
+		$("#dg").datagrid({
+			url:"/doctor/doctor/deptlist",
+			method:'get',
+			onDblClickRow:function(index,row){
+				$("#dlg").dialog("open").dialog("setTitle","修改部门信息");
+				$("#fm").form("load",row);
+			}
+		});
+
+	});
+</script>
+</html>

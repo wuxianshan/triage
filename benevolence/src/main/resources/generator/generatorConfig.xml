@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+    <classPathEntry  location="D:\maven\Repository\mysql\mysql-connector-java\5.1.47\mysql-connector-java-5.1.47.jar"/>
+    <context id="context" targetRuntime="MyBatis3">
+        <commentGenerator>
+            <property name="suppressAllComments" value="false"/>
+            <property name="suppressDate" value="true"/>
+        </commentGenerator>
+
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/hh?useUnicode=true"
+                        userId="root"
+                        password="123456">
+        </jdbcConnection>
+
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="false"/>
+        </javaTypeResolver>
+
+        <javaModelGenerator targetPackage="cn.benevolence.patient.model" targetProject="src/main/java"/>
+
+        <sqlMapGenerator targetPackage="mapper.patient" targetProject="src/main/resources"/>
+
+        <javaClientGenerator targetPackage="cn.benevolence.patient.mapper" targetProject="src/main/java"
+                             type="XMLMAPPER"/>
+
+<!--        <table tableName="sys_resources" domainObjectName="Resources" enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+               enableUpdateByExample="false">
+            &lt;!&ndash;mysql 配置&ndash;&gt;
+            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
+            &lt;!&ndash;oracle 配置&ndash;&gt;
+            &lt;!&ndash;<generatedKey column="id" sqlStatement="select SEQ_{1}.nextval from dual" identity="false" type="pre"/>&ndash;&gt;
+        </table>
+        <table tableName="sys_role" domainObjectName="Role" enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+               enableUpdateByExample="false">
+            &lt;!&ndash;mysql 配置&ndash;&gt;
+            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
+            &lt;!&ndash;oracle 配置&ndash;&gt;
+            &lt;!&ndash;<generatedKey column="id" sqlStatement="select SEQ_{1}.nextval from dual" identity="false" type="pre"/>&ndash;&gt;
+        </table>
+        <table tableName="sys_role_resources" domainObjectName="RoleResources" enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+               enableUpdateByExample="false">
+            &lt;!&ndash;mysql 配置&ndash;&gt;
+            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
+            &lt;!&ndash;oracle 配置&ndash;&gt;
+            &lt;!&ndash;<generatedKey column="id" sqlStatement="select SEQ_{1}.nextval from dual" identity="false" type="pre"/>&ndash;&gt;
+        </table>
+        <table tableName="sys_user_role" domainObjectName="UserRole" enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+               enableUpdateByExample="false">
+            &lt;!&ndash;mysql 配置&ndash;&gt;
+            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
+            &lt;!&ndash;oracle 配置&ndash;&gt;
+            &lt;!&ndash;<generatedKey column="id" sqlStatement="select SEQ_{1}.nextval from dual" identity="false" type="pre"/>&ndash;&gt;
+        </table>-->
+
+<!--        % 为所有表都生成出来     -->
+<!--        <table tableName="%" >-->
+<!--            <property name="enableSubPackages" value="true" />-->
+<!--            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>-->
+<!--        </table>-->
+
+
+<!--        <table tableName="sys_user" domainObjectName="User">
+            <property name="enableSubPackages" value="true" />
+            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
+        </table>
+
+        <table tableName="sys_role" domainObjectName="Role">
+            <property name="enableSubPackages" value="true" />
+            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
+        </table>
+        <table tableName="sys_permission" domainObjectName="Permission">
+            <property name="enableSubPackages" value="true" />
+            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
+        </table>
+        <table tableName="sys_log" domainObjectName="Log">
+            <property name="enableSubPackages" value="true" />
+            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
+        </table>-->
+<!--        <table tableName="history" domainObjectName="History">-->
+<!--            <property name="enableSubPackages" value="true" />-->
+<!--            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>-->
+<!--        </table>-->
+<!--        <table tableName="tri_dept" domainObjectName="Dept">-->
+<!--            <property name="enableSubPackages" value="true" />-->
+<!--            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>-->
+<!--        </table>-->
+      <!--  <table tableName="doc_scheduling" domainObjectName="Scheduling">
+            <property name="enableSubPackages" value="true" />
+            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
+        </table>-->
+<!--        <table tableName="information" domainObjectName="Information">-->
+<!--            <property name="enableSubPackages" value="true" />-->
+<!--            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>-->
+<!--        </table>-->
+        <table tableName="patient" domainObjectName="Patient">
+            <property name="enableSubPackages" value="true" />
+            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
+        </table>
+<!--        <table tableName="role" domainObjectName="Role">-->
+<!--            <property name="enableSubPackages" value="true" />-->
+<!--            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>-->
+<!--        </table>-->
+<!--        <table tableName="sys_log" domainObjectName="Log">-->
+<!--            <property name="enableSubPackages" value="true" />-->
+<!--            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>-->
+<!--        </table>-->
+<!--        <table tableName="sys_permission" domainObjectName="Permission">-->
+<!--            <property name="enableSubPackages" value="true" />-->
+<!--            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>-->
+<!--        </table>-->
+<!--        <table tableName="tri_dept" domainObjectName="Dept">-->
+<!--            <property name="enableSubPackages" value="true" />-->
+<!--            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>-->
+<!--        </table>-->
+    <!--    <table tableName="make_registration" domainObjectName="Registration">
+            <property name="enableSubPackages" value="true" />
+            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
+        </table>-->
+<!--        <table tableName="sys_user" domainObjectName="User">-->
+<!--            <property name="enableSubPackages" value="true" />-->
+<!--            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>-->
+<!--        </table>-->
+    </context>
+</generatorConfiguration>

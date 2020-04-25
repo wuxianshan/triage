@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>用户管理</title>
+	<link th:include="comm/head :: copy">
+</head>
+<body style="margin: 1px">
+	<table id="dg" title="用户管理" class="easyui-datagrid"
+	fitColumns="true" pagination="true" rownumbers="true" singleSelect="true"
+	 fit="true" toolbar="#tb">
+		<thead>
+			<th field="ck" width="20" align="center" checkbox="true"></th>
+			<th field="id" width="20" align="center" >编号</th>
+			<th field="pid" width="50" align="center">患者名称</th>
+			<th field="did" width="50" align="center">医生名</th>
+			<th field="hdiagnose" width="80" align="center">诊断</th>
+			<th field="hsymptom" width="80" align="center">症状</th>
+			<th field="hprescription" width="80" align="center">处方</th>
+		</thead>
+	</table>
+
+	<div id="tb">
+		<div style="display: inline-block">
+			&nbsp;<input placeholder="用户名" type="text" id="s_userName" size="20" onkeydown="if(event.keyCode==13) searchUser()"/>
+			<a href="javascript:searchUser()" class="easyui-linkbutton" iconCls="icon-search" plain="true">搜索</a>
+		</div>
+	</div>
+
+
+	<div id="dlg" class="easyui-dialog" modal="true" style="width: 450px;height: 500px;padding: 10px 20px"
+	closed="true" buttons="#dlg-buttons" data-options="onClose:function(){resetValue()}">
+		<form id="fm" method="post">
+			<input type="hidden" name="pid" id="pid">
+			<table cellspacing="8px">
+			</table>
+		</form>
+	</div>
+
+	<div id="dlg2" class="easyui-dialog" modal="true" style="width: 500px;height: 350px;"
+	closed="true" buttons="#dlg-buttons2">
+	    <input type="hidden" id="userId" name="userId"/>
+		<table id="dg2"  class="easyui-datagrid" fitColumns="true" fit="true">
+		<thead>
+		    <th field="cb" checkbox="true" align="center"></th>
+			<th field="id" width="20" align="left" hidden="true">编号</th>
+			<th field="cname" width="100" align="left">角色名称</th>
+			<th field="description" width="200" align="left">备注</th>
+		</thead>
+	</table>
+	</div>
+
+	<div id="dlg-buttons2">
+		<a href="javascript:saveRoleSet()" class="easyui-linkbutton" iconCls="icon-ok" >保存</a>
+		<a href="javascript:closeRoleSetDialog()" class="easyui-linkbutton" iconCls="icon-cancel" >关闭</a>
+	</div>
+</body>
+<script type="text/javascript">
+
+
+
+	function searchUser(){
+		$("#dg").datagrid('load',{
+			'pname':$("#s_userName").val()
+		});
+	}
+
+
+	function closeUserDialog(){
+		$("#dlg").dialog("close");
+		resetValue();
+	}
+
+	$(document).ready(function() {
+
+		$("#dg").datagrid({
+			url:"/history/likes",
+			method:'get',
+			onDblClickRow:function(index,row){
+				$("#dlg").dialog("open").dialog("setTitle","修改用户信息");
+				$("#fm").form("load",row);
+				$("#userName").attr("readonly","readonly");
+				url="/admin/user/save?id="+row.id;
+			}
+		});
+
+	});
+
+	function closeRoleSetDialog(){
+		$("#dlg2").dialog("close");
+	}
+
+
+</script>
+</html>

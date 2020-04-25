@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>医生管理</title>
+    <link th:include="comm/head :: copy"/>
+</head>
+<body style="margin: 1px">
+<table id="dg" title="医生管理" class="easyui-datagrid"
+       fitColumns="true" pagination="true" rownumbers="true"
+       fit="true" toolbar="#tb"  striped="true">
+    <thead>
+    <th field="ss" width="20" align="center"checkbox="true"></th>
+    <th field="did" width="20" align="center" hidden="true">编号</th>
+    <th field="dname" width="50" align="center">医生姓名</th>
+    <th field="dage" width="50" align="center">医生年龄</th>
+    <th field="dsex" width="100" align="center" formatter="age">医生性别</th>
+    <th field="ddid" width="100" align="center">医生科室</th>
+    <th field="deducation" width="100" align="center">医生学历</th>
+    <th field="bb" width="50" align="center" formatter="formatOperation">操作</th>
+    </thead>
+</table>
+
+<div id="tb">
+    <div style="display: inline-block">
+        <a href="javascript:openDoctorAdd()" class="easyui-linkbutton" iconCls="icon-add" plain="true">添加医生信息</a>
+        <a href="javascript:delAllDoctor()" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除医生信息</a>
+    </div>
+    <div style="display: inline-block;float: right">
+        &nbsp;医生姓名：&nbsp;<input type="text" id="s_doctorName" size="20" onkeydown="if(event.keyCode==13) searchDoctor()"/>
+        <a href="javascript:searchDoctor()" class="easyui-linkbutton" iconCls="icon-search" plain="true">搜索</a>
+    </div>
+</div>
+
+
+<div id="dlg" class="easyui-dialog" style="width: 480px;height: 320px;padding: 10px 20px"
+     closed="true" buttons="#dlg-buttons" data-options="onClose:function(){}" modal="true">
+    <form id="fm" method="post">
+        <input type="hidden" id="did" name="did">
+        <table cellspacing="8px">
+            <tr>
+                <td>医生姓名：</td>
+                <td>
+                    <input type="text" id="dname" name="dname" class="easyui-validatebox" required="true" style="width: 200px;"/>
+                </td>
+            </tr>
+            <tr>
+                <td>医生年龄：</td>
+                <td>
+                    <input type="text" id="dage" name="dage" class="easyui-validatebox" required="true" style="width: 200px;"/>
+                </td>
+            </tr>
+            <tr>
+                <td>医生性别：</td>
+                <td>
+                    <select id="dsex" name="dsex" class="easyui-validatebox" required="true">
+                        <option value="0">男</option>
+                        <option value="1">女</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>所在科室：</td>
+                <td>
+                    <select id="ddid" name="ddid" required="true" style="width:200px;" onchange="change(this.value)">
+
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>医生学历：</td>
+                <td>
+                    <input type="text" id="deducation" name="deducation" class="easyui-validatebox" required="true" style="width: 200px;"/>
+
+                </td>
+            </tr>
+            <tr>
+                <td>级别：</td>
+                <td>
+                    <select id="position" name="position" class="easyui-validatebox" required="true">
+                    <option value="专家">专家</option>
+                    <option value="普通">普通</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<div id="dlg-buttons">
+    <a href="javascript:saveDoctor()" class="easyui-linkbutton primary">确定</a>
+    <a href="javascript:closeDoctor()" class="easyui-linkbutton" >关闭</a>
+</div>
+
+</body>
+<script type="text/javascript">
+    function age(value) {
+        if(value==true){
+            return "女";
+        }else {
+            return '男';
+        }
+    }
+
+    function searchDoctor(){
+        $("#dg").datagrid('load',{
+            "name":$("#s_deptName").val()
+        });
+    }
+
+    function closeDoctor(){
+        $("#dlg").dialog("close");
+    }
+
+    function saveDoctor(){
+        $("#fm").form("submit",{
+            url:"/doctor/doctor/save",
+            onSubmit:function(){
+                return $(this).form("validate");
+            },
+            success:function(result){
+                var result=eval('('+result+')');
+                if(result.success){
+                    message(result.msg);
+                    $("#dlg").dialog("close");
+                    $("#dg").datagrid("reload");
+                    $('#fm').form('clear');
+                }else{
+                    message(result.msg);
+                }
+            }
+        });
+    }
+    /*弹出添加医生信息窗口*/
+    function openDoctorAdd(){
+        $("#dlg").dialog("open").dialog("setTitle","医生管理添加信息");
+        $('#fm').form('clear');
+        this.doctorList();
+    }
+    /*ajax获取医生表的信息，并添加到*/
+    function doctorList(){
+        $.post("/doctor/doctor/deptall",function(data){
+            var str = "<option value='aa'>请选择科室</option>";
+            //遍历数据
+            console.log(data);
+            for( var i=0; i<data.rows.length; i++){
+                str +="<option value='"+data.rows[i].id+"'>"+data.rows[i].name+"</option>";
+                console.log(data.rows[i].name);
+            }
+            $("#ddid").append(str);
+        },"json");
+    }
+    // /*显示已选择科室下面对应的医生*/
+    // function change(name){
+    //     console.log("打印"+name);
+    //     $.post("/doctor/info/doctorList",{name:name},function(result){
+    //         var doctor = eval(result);
+    //         console.log(doctor);
+    //         var str = "<option value='aa'>请选择医生</option>";
+    //         //遍历数据
+    //         for( var i=0; i<doctor.rows.length; i++){
+    //             str +="<option value='"+doctor.rows[i].dName+"'>"+doctor.rows[i].dName+"</option>";
+    //             console.log(doctor.rows[i].dName);
+    //         }
+    //         $("#doctor").append(str);
+    //     },"json");
+    // }
+
+    function editFun(index){
+        $("#dg").datagrid("clearSelections");
+        $("#dg").datagrid("selectRow",index);
+        var row = $("#dg").datagrid("getSelected");
+        // var selectedRows=$("#dg").datagrid("getSelections");
+        $("#dlg").dialog("open").dialog("setTitle","修改医生信息");
+        $("#fm").form("load",row);
+    }
+
+    function delDecoter(did){
+        $.messager.confirm("系统提示","您确定要删除这条数据吗?",function(r){
+            if(r){
+                $.post("/doctor/doctor/del",{did:did},function(result){
+                    if(result.success){
+                        // $.messager.alert("系统提示","数据已成功删除！");
+                        message("数据已成功删除");
+                        $("#dg").datagrid("reload");
+                    }else{
+                        message(result.msg);
+                    }
+                },"json");
+            }
+        });
+    }
+    function delAllDoctor(){
+        var selectedRows=$("#dg").datagrid("getSelections");
+        if(selectedRows.length < 1){
+            $.messager.alert("系统提示","请选择要删除的数据！");
+            return;
+        }
+        const ids = selectedRows.map(item =>{
+            return item.id;
+        });
+        $.messager.confirm("系统提示","您确定要删除数据吗?",function(r){
+            if(r){
+                $.post("/doctor/info/deleteAll",{ids:ids.join(",")},function(result){
+                    if(result.success){
+                        message(result.msg);
+                        $("#dg").datagrid("reload");
+                    }else{
+                        message(result.msg);
+                    }
+                },"json");
+            }
+        });
+    }
+    $(document).ready(function() {
+        $("#dg").datagrid({
+            url: "/doctor/doctor/dept",
+            method: "get",
+            onDblClickRow:function(index,row){
+                $("#dlg").dialog("open").dialog("setTitle","修改医生信息");
+                $("#fm").form("load",row);
+            }
+        });
+    });
+    function formatOperation(val,row,index){
+        str="<a href=\"javascript:editFun("+index+")\" class='dept-easyui-linkbutton-edit'>修改</a>"
+        str+="<a href=\"javascript:delDecoter("+row.did+")\" class='dept-easyui-linkbutton-del'>删除</a>"
+        return str;
+    }
+    $("#dg").datagrid({
+        onLoadSuccess: function (data) {
+            $('.dept-easyui-linkbutton-edit').linkbutton({text: '修改', plain: true, iconCls: 'fa fa-paint-brush'});
+            $('.dept-easyui-linkbutton-del').linkbutton({text: '删除', plain: true, iconCls: 'fa fa-trash'});
+            $('#dg').datagrid('fixRowHeight');
+        }
+    });
+
+</script>
+</html>

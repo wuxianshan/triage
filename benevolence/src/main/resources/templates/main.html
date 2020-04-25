@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>药生尘分诊系统</title>
+	<link rel="SHORTCUT ICON" href="images/icon/favicon.ico"/>
+	<link th:include="comm/head :: copy">
+<script src="/easyui/themes/super/superDemo.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+	$(function () {
+		var content="<iframe frameborder=0 scrolling='auto' style='width:100%;height:99%' src='/first'></iframe>";
+		$("#tt").tabs("add",{
+			title:"首页",
+			iconCls:"fa fa-home",
+			closable:false,
+			content:content
+		});
+	})
+</script>
+</head>
+<script type="text/javascript">
+	function resetValue() {
+		$("#fm").from("clear");
+	}
+	function openModifyPassword() {
+		$("#dlg").dialog("open");
+	}
+	function closePasswordModifyDialog() {
+		$("#dlg").dialog("close");
+	}
+	function modifyPassword(){
+		$("#fm").form("submit",{
+			url:"/modifyPassword",
+			onSubmit:function(){
+				var newPassword=$("#newPassword").val();
+				var okPassword=$("#okPassword").val();
+				if(newPassword!=okPassword){
+					message("确认新密码输入错误！")
+					return false;
+				}
+				return true;
+			},
+			success:function(result){
+				var result=eval('('+result+')');
+				if(result.success){
+					message("密码修改成功，下一次登录生效！")
+					$("#dlg").dialog("close");
+				}else{
+					message("密码修改失败，请联系管理员！")
+				}
+			}
+		});
+	}
+</script>
+<body id="main" class="easyui-layout super-theme-example" >
+<div id="dlg" title="修改密码" class="easyui-dialog" style="width: 350px;height: 250px;padding: 10px 20px"
+	 closed="true" buttons="#dlg-buttons" data-options="onClose:function(){resetValue()}">
+	<form id="fm" method="post">
+		<table cellspacing="8px">
+			<tr>
+				<td>旧密码：</td>
+				<td>
+					<input class="easyui-passwordbox" id="oldPassword" name="oldPassword" prompt="旧密码" iconWidth="28" style="width: 200px">
+				</td>
+			</tr>
+			<tr>
+				<td>新密码：</td>
+				<td>
+					<input class="easyui-passwordbox" prompt="新密码" id="newPassword" name="newPassword" iconWidth="28" style="width: 200px">
+				</td>
+			</tr>
+			<tr>
+				<td>确认密码：</td>
+				<td>
+					<input class="easyui-passwordbox" prompt="确认密码" id="okPassword" name="okPassword" iconWidth="28" style="width: 200px">
+				</td>
+			</tr>
+		</table>
+	</form>
+</div>
+
+<div id="dlg-buttons">
+	<a href="javascript:modifyPassword()" class="easyui-linkbutton primary" >保存</a>
+	<a href="javascript:closePasswordModifyDialog()" class="easyui-linkbutton"  >关闭</a>
+</div>
+<div data-options="region:'north',border:false" class="super-north">
+	<!--顶部-->
+	<div class="super-navigation">
+		<!--系统名称-->
+		<div class="super-navigation-title">药生尘分诊系统</div>
+		<!--自定义导航-->
+		<div class="super-navigation-main">
+			<div class="super-setting-left">
+				<ul>
+					<li><i class="fa fa-commenting-o"></i>消息</li>
+					<li><i class="fa fa-envelope-o"></i>邮件</li>
+					<li><i class="fa fa-bell-o"></i>通知</li>
+				</ul>
+			</div>
+			<div class="super-setting-right">
+				<ul>
+					<li>
+						<div class="super-setting-icon">
+							<i class="fa fa-gears"></i>
+						</div>
+						<div id="mm" class="easyui-menu">
+							<div onclick="openModifyPassword()">修改密码</div>
+							<div id="themeSetting">主题</div>
+							<div class="menu-sep"></div>
+							<div id="logout">退出</div>
+						</div>
+					</li>
+					<li class="user">
+						<span class="user-icon"><img src="/images/favicon.png"/>
+							<label th:text="${session.name}"></label>
+						</span>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+<div data-options="region:'west',title:'菜单',border:false" class="super-west">
+	<!--左侧导航-->
+	<div class="easyui-accordion" data-options="border:false" id="main-menu">
+
+	</div>
+</div>
+<div data-options="region:'center'" style="padding-top: 2px;">
+	<!--主要内容-->
+	<div id="tt" class="easyui-tabs" data-options="border:false,fit:true">
+
+	</div>
+</div>
+<div data-options="region:'south'" class="super-south">
+	<!--页脚-->
+	<div class="super-footer-info">
+		<span><i class="fa fa-info-circle"></i> 作者：tianyu</span>
+		<span><i class="fa fa-copyright"></i> CopyRight 2020 版权所有 <i class="fa fa-caret-right"></i></span>
+	</div>
+</div>
+
+<!--主题设置弹窗-->
+<div id="win">
+	<div class="themeItem">
+		<ul>
+			<li>
+				<div class="superGreen" style="background: #1abc9c;">green</div>
+			</li>
+			<li class="themeActive">
+				<div class="superBlue" style="background: #3498db;">blue</div>
+			</li>
+			<li>
+				<div class="superGray" style="background: #95a5a6;">gray</div>
+			</li>
+			<li>
+				<div class="superAmethyst" style="background: #9b59b6;">amethyst</div>
+			</li>
+			<li>
+				<div class="superBlack" style="background: #34495e;">black</div>
+			</li>
+			<li>
+				<div class="superYellow" style="background: #e67e22;">yellow</div>
+			</li>
+			<li>
+				<div class="superEmerald" style="background: #2ecc71;">emerald</div>
+			</li>
+			<li>
+				<div class="superRed" style="background: #e74c3c;">red</div>
+			</li>
+		</ul>
+	</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>部门管理</title>
+	<link th:include="comm/head :: copy">
+</head>
+<body style="margin: 1px" class="easyui-layout super-theme-example">
+
+<div>
+	<div id="dlg" title="充值金额" class="easyui-dialog" style="width: 350px;height: 250px;padding: 10px 20px" buttons="#dlg-buttons">
+
+			<table cellspacing="8px">
+				<tr>
+					<td>充值金额：</td>
+					<td>
+						<input id="pmoney" class="easyui-validatebox easyui-textbox" prompt="请输入充值金额" data-options="required:true,validType:'length[3,10]'">
+					</td>
+				</tr>
+				<tr>
+					<td>充值账户：</td>
+					<td>
+						<input id="pphone" class="easyui-validatebox easyui-textbox" prompt="请输入充值金额" data-options="required:true,validType:'length[3,10]'">
+
+					</td>
+				</tr>
+			</table>
+	</div>
+	<div id="dlg-buttons">
+		<a href="javascript:modifyPassword()" class="easyui-linkbutton primary" >保存</a>
+		<a href="javascript:closePasswordModifyDialog()" class="easyui-linkbutton"  >关闭</a>
+	</div>
+</div>
+
+</body>
+<script type="text/javascript">
+	function modifyPassword(){
+		var pmoney = $("#pmoney").val();
+		var pphone = $("#pphone").val();
+		$.ajax({
+			'url':'/patient/moneys',
+			'type':'post',
+			'data':'pmoney='+pmoney+'&pphone='+pphone,
+			'dataType':'',
+			success:function () {
+				message("充值成功");
+				// window.parent.location.reload();
+				$('#dlg').form('clear');
+				// window.location.href='/patient/page';
+			}
+		})
+
+	}
+
+</script>
+</html>

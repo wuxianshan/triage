@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'/>
+  <link href='/css/fullcalendar.css' rel='stylesheet'/>
+  <link href='/css/fullcalendar.print.css' rel='stylesheet' media='print'/>
+  <style>
+    body {
+      margin: 10px 10px;
+      padding: 0;
+      font-family: "Lucida Grande", Helvetica, Arial, Verdana, sans-serif;
+      font-size: 14px;
+    }
+
+    #calendar {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    #box {
+      display: none;
+    }
+
+    .form-inline {
+      padding: 20px;
+    }
+
+    .select {
+      display: block;
+      width: 100%;
+      padding: 5px 0;
+      margin-bottom: 20px;
+    }
+
+    .label-success {
+      background-color: #82af6f;
+    }
+
+    .label-danger {
+      background-color: #d15b47;
+    }
+  </style>
+</head>
+<body>
+
+<div id='calendar'></div>
+
+<div id='box'>
+  <form class='form-inline'>
+        <select id="docName" name='docName' class='select'>
+
+        </select>
+    <div class='radios'>
+      <label class='label_canlendar'><input class='ace' type='radio' value='#3a87ad' name='code' checked><span
+              class='classes' style='color:#3a87ad'>早班</span></label>
+      <label class='label_canlendar'><input class='ace' type='radio' value='#82af6f' name='code'><span
+              class='classes' style='color:#82af6f'>中班</span></label>
+      <label class='label_canlendar'><input class='ace' type='radio' value='#d15b47' name='code'><span
+              class='classes' style='color:#d15b47'>晚班</span></label>
+    </div>
+  </form>
+</div>
+
+<script src='/js/jquery.min.js'></script>
+<script src='/js/moment.min.js'></script>
+<script src='/js/fullcalendar.js'></script>
+<script src="/js/locale/zh-cn.js"></script>
+<script src="/layer/layer.js"></script>
+<script>
+  // setInterval(function () {
+    $.ajax({
+      url: "/doctor/demo/doc",
+      type: 'get',
+      async: false,
+      success: function (result) {
+        console.log(result);
+        for (var i = 0; i < result.length; i++) {
+          var str = "<option value=\"" + result[i].did + "\">" + result[i].dname + "</option>";
+          $("#docName").append(str)
+        }
+      }
+    });
+  // },1000);
+
+
+  var events = new Array();
+        // setInterval(function () {
+            $.ajax({
+                url: "/doctor/demo/work",
+                type: 'get',
+                async: false,
+                success: function (result) {
+                    var work;
+                    console.log(result);
+                    for (var i = 0; i < result.length; i++) {
+                        var str = new Array();
+                        if (result[i].backgroundColor == "#3a87ad") {
+                            work = "早班"
+                        }
+                        if (result[i].backgroundColor == "#82af6f") {
+                            work = "中班"
+                        }
+                        if (result[i].backgroundColor == "#d15b47") {
+                            work = "晚班"
+                        }
+                        events[i] =
+                            {
+                                id: result[i].id,
+                                doId: result[i].docid,
+                                text: result[i].dname,
+                                title: result[i].dname + " - " + work + " - " + result[i].name,
+                                backgroundColor: result[i].backgroundColor,
+                                start: result[i].sdate
+                            };
+                    }
+                    // console.log("events<<<<<"+events)
+                }
+            });
+        // },500);
+
+           $box = $('#box');
+           $calendar = $('#calendar');
+           $calendar.fullCalendar('destroy');
+
+  var ss= new Date();
+  var calendar = $calendar.fullCalendar({
+    height : window.innerHeight-20,
+    windowResize: function(view) {
+      $('#calendar').fullCalendar('option', 'height', window.innerHeight-20);
+    },
+    header: {
+      left: 'month,agendaWeek,agendaDay',
+      center: '',
+      right: 'prev,next today'
+    },
+    buttonText: {
+      today: '今天'
+    },
+    locale: 'zh-cn',
+    defaultView: "month", // basicWeek listWeek agendaWeek
+    weekMode: 'liquid',
+    // weekNumbers: true,
+    // height: 'auto',
+
+    timeFormat: 'HH:mm',
+    // defaultDate: '2020-02-24', 不设置默认当前日期
+    navLinks: true,       // can click day/week names to navigate views
+    eventLimit: 3,        // 限制一天中显示的事件数，默认false
+    allDayText: '排班',   // 日历上显示全天的文本
+    selectable: true,     // 允许用户通过单击或拖动选择日历中的对象，包括天和时间。
+    selectHelper: false,  // 当点击或拖动选择时间时，显示默认加载的提示信息，该属性只在周/天视图里可用。
+    unselectAuto: true,   // 当点击页面日历以外的位置时，自动取消当前的选中状态。
+    eventBackgroundColor: '#3a87ad',    // 设置日程事件的背景色
+    events: events,
+    select: select,
+    eventClick: eventClick
+  });
+
+  // 添加排班
+  function select(start, end, allDay) {
+    layer.open({
+      type: 1,
+      shade: false,
+      content: $box,
+      title: '选择班次',
+      btn: ['确认', '关闭'],
+      btn1: function () {
+        layer.closeAll();
+      },
+      yes: addCallback
+    });
+
+    // 添加排班 - 弹窗回调
+    function addCallback() {
+      var bgColor = $box.find("input[name=code]:checked").val();
+      var title = $box.find("input[name=code]:checked").next().text();
+      var text = $box.find("option:selected").text();
+      var dept ;
+      var id = $box.find("#docName").val();
+      console.log("id===>"+id);
+      $.ajax({
+        url: "/doctor/demo/getDeptName?id="+id,
+        type:'get',
+        async: false,
+        success: function(result) {
+          dept=result;
+          console.log(">>>>"+dept)
+        }
+      });
+
+      var json = {
+        title: text + ' - ' + title + ' - ' + dept,
+        text: text,
+        allDay: allDay,
+        backgroundColor: bgColor,
+        start: start.format('YYYY-MM-DD'),
+        end: end.format('YYYY-MM-DD')
+      };
+      console.log(start.format('YYYY-MM-DD'))
+      var ssdate = new Date(start.format('YYYY-MM-DD').replace(/-/,"/"))
+      console.log(ssdate)
+      var mydate = {
+        docid: id,
+        backgroundcolor: bgColor,
+        sdate: ssdate
+      };
+      // test
+      // $('#calendar').fullCalendar('renderEvent', json, true);// 添加日历
+      if (json.title == null || json.title == '') {
+        return false;
+      }
+      if (checkStr(json.title) == false) {
+        alert("请不要输入非法字符！");
+        return;
+      }
+
+      $.get("/doctor/demo/save", mydate, function (data) {
+        calendar.fullCalendar('renderEvent', json, true); // 添加日历
+      }, "json");
+
+
+      layer.closeAll();
+    }
+
+    calendar.fullCalendar('unselect');
+  }
+
+
+  // 更新排班
+  function eventClick(calEvent, jsEvent, view) {
+    var code = calEvent.backgroundColor;
+    var form = [];
+    console.log(calEvent);
+    var id=calEvent.id;
+    console.log(id)
+    form.push("<form class='form-inline'>");
+    form.push(" <select name='username' class='select'>");
+
+    $.ajax({
+      url: "/doctor/demo/doc",
+      type:'get',
+      async: false,
+      success: function(result) {
+        for (var i = 0; i < result.length; i++) {
+          form.push("  <option value='"+result[i].did+"'" + (calEvent.text == ''+result[i].dname+'' ? 'selected' : calEvent.text) + ">"+result[i].dname+"</option>");
+          events[i] =
+                  {
+                    ids: result[i].did,
+                  };
+        }
+      }
+    });
+    form.push(" </select>");
+    form.push(" <div class='radios'>");
+    form.push("  <label class='label_canlendar'><input type='radio' value='#3a87ad' name='code' " + (code == '#3a87ad' ? 'checked' : '') + "><span class='classes'style='color:#3a87ad'>早班</span></label>");
+    form.push("  <label class='label_canlendar'><input type='radio' value='#82af6f' name='code' " + (code == '#82af6f' ? 'checked' : '') + "><span class='classes'style='color:#82af6f'>中班</span></label>");
+    form.push("  <label class='label_canlendar'><input type='radio' value='#d15b47' name='code' " + (code == '#d15b47' ? 'checked' : '') + "><span class='classes'style='color:#d15b47'>晚班</span></label>");
+    form.push(" </div>");
+    form.push("</form>");
+    $box.html(form.join(''));
+
+    layer.open({
+      type: 1,
+      shade: false,
+      title: '当前班次：' + calEvent.title,
+      content: $box,
+      btn: ['确认', '删除', '关闭'],
+      btn2: function () {
+        // delEvent(calEvent.id);// 删除排班
+        console.log(calEvent.id)
+        $.get("/doctor/demo/del", {id: calEvent.id}, function(data) {
+          calendar.fullCalendar("removeEvents", calEvent._id); // 删除日历
+          alert('删除成功');
+        });
+        layer.closeAll();
+      },
+      btn3: function () {
+        layer.closeAll();
+      },
+      yes: updateCallback
+    });
+
+    // 更新排班 - 弹窗回调
+    function updateCallback() {
+      var bgColor = $box.find("input[name=code]:checked").val();
+      var title = $box.find("input[name=code]:checked").next().text();
+      var text = $box.find("option:selected").text();
+      var dept ;
+      var docid = calEvent.doId;
+      console.log("doctorid===="+docid);
+      $.ajax({
+        url: "/doctor/demo/getDeptName?id="+docid,
+        type:'get',
+        async: false,
+        success: function(result) {
+          dept=result;
+        }
+      });
+
+      calEvent.title = text + ' - ' +title+ ' - ' + dept;
+      calEvent.text = text;
+      calEvent.backgroundColor = bgColor;
+      if (calEvent.title == null || calEvent.title == '') {
+        return false;
+      }
+      if (checkStr(calEvent.title) == false) {
+        alert("请不要输入非法字符！");
+        return;
+      }
+      var doid = $("#docName").val();
+      console.log("doid>>"+doid);
+
+      $.get("/doctor/demo/upwork?id="+calEvent.id, {
+
+        docid: calEvent.doId,
+        // allDay: calEvent.allDay,
+        // title: calEvent.title,
+        // sdate: new Date(calEvent.start.format('YYYY-MM-DD').replace(/-/,"/")),
+        backgroundcolor: calEvent.backgroundColor
+      }, function (data) {
+        calendar.fullCalendar('updateEvent', calEvent); // 更新日历
+      }, "json");
+
+      layer.closeAll();
+    }
+  }
+
+  // 删除排班
+
+
+  // 是否全天
+  function getAllDay(start, end) {
+    var start_his = start.indexOf("00:00:00");
+    var end_his = end.indexOf("00:00:00");
+    if (start_his == -1 || end_his == -1) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  // 非法字符
+  function checkStr(str) {
+    var pattern = /[~#^$@%&!*'"]/gi;
+    if (pattern.test(str)) {
+      return false;
+    }
+    return true;
+  }
+</script>
+</body>
+</html>

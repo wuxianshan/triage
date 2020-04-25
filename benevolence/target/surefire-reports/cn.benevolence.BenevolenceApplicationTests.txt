@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: cn.benevolence.BenevolenceApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.324 s - in cn.benevolence.BenevolenceApplicationTests

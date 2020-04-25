@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>日志管理</title>
+	<link th:include="comm/head :: copy">
+</head>
+<body style="margin: 1px">
+	<table id="dg" title="日志管理" class="easyui-datagrid"
+	fitColumns="true" pagination="true" rownumbers="true" singleSelect="true"
+	 fit="true" toolbar="#tb">
+		<thead>
+			<th field="ck" width="20" align="center" checkbox="true"></th>
+			<th field="id" width="20" align="center" >编号</th>
+			<th field="username" width="50" align="center">名称</th>
+			<th field="ip" width="80" align="center">ip地址</th>
+			<th field="time" width="80" align="center">访问时长</th>
+			<th field="createtime" width="80" align="center">访问时间</th>
+		</thead>
+	</table>
+
+
+
+
+</body>
+<script type="text/javascript">
+
+
+	function searchUser(){
+		$("#dg").datagrid('load',{
+			'name':$("#s_userName").val()
+		});
+	}
+
+	function resetValue(){
+		$("#userName").val("");
+		$("#password").val("");
+		$("#trueName").val("");
+		$("#remarks").val("");
+	}
+
+	function closeUserDialog(){
+		$("#dlg").dialog("close");
+		resetValue();
+	}
+
+
+
+	$(document).ready(function() {
+
+		$("#dg").datagrid({
+			url:"/sys/log/list",
+			method:'get',
+			onDblClickRow:function(index,row){
+				$("#dlg").dialog("open").dialog("setTitle","修改用户信息");
+				$("#fm").form("load",row);
+				$("#userName").attr("readonly","readonly");
+				url="/admin/user/save?id="+row.id;
+			}
+		});
+
+	});
+
+
+	function saveRoleSet(){
+		var userId=$("#userId").val();
+		var selectedRows=$("#dg2").datagrid("getSelections");
+		var strRoleIds=[];
+		var strRoleNames=[];
+		for(var i=0;i<selectedRows.length;i++){
+			strRoleIds.push(selectedRows[i].id);
+			strRoleNames.push(selectedRows[i].cname);
+		}
+		var roleIds=strRoleIds.join(",");
+		$.post("/sys/user/saveRoleSet",{roleIds:roleIds,roleNames:strRoleNames.join(","),userId:userId},function(result){
+			if(result.success){
+				closeRoleSetDialog();
+				$("#dg").datagrid("reload");
+			}else{
+				message("系统提示","提交失败，请联系管理员！");
+				// $.messager.alert("系统提示","提交失败，请联系管理员！");
+			}
+		},"json");
+	}
+
+	function closeRoleSetDialog(){
+		$("#dlg2").dialog("close");
+	}
+
+
+</script>
+</html>

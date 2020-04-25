@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>综合例子</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="vue/vue.min.js"></script>
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+<div id="app">
+    <el-button type="primary" icon="el-icon-edit" @click="dialogFormVisible = true" size="small">增加</el-button>
+    <el-table
+            :data="tableData"
+            style="width: 100%">
+        <el-table-column prop="id" lable="ID" width="180" label="ID" ></el-table-column>
+        <el-table-column prop="name" lable="名字" width="180" label="名字" ></el-table-column>
+        <el-table-column prop="password" lable="密码" width="180" label="密码"></el-table-column>
+
+        <el-table-column label="操作">
+            <template slot-scope="scope">
+                <el-button
+                        size="mini"
+                        @click="handleEdit(scope.$index, scope.row,scope.column)">编辑</el-button>
+                <el-button
+                        size="mini"
+                        type="danger"
+                        @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+            </template>
+        </el-table-column>
+    </el-table>
+
+
+    <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="page"
+            :page-sizes="[10, 15, 20, 25]"
+            :page-size="size"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="total">
+    </el-pagination>
+
+    <!-- Form -->
+
+    <el-dialog title="修改信息" :visible.sync="dialogFormVisible">
+        <el-form :model="user">
+            <el-form-item label="ID" :label-width="formLabelWidth">
+                <el-input v-model="user.id" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="名字" :label-width="formLabelWidth">
+                <el-input v-model="user.name" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="密码" :label-width="formLabelWidth">
+                <el-input v-model="user.password" autocomplete="off"></el-input>
+            </el-form-item>
+
+
+            <el-form-item label="活动区域" :label-width="formLabelWidth">
+                <el-select v-model="user" placeholder="请选择活动区域">
+                    <el-option label="区域一" value="shanghai"></el-option>
+                    <el-option label="区域二" value="beijing"></el-option>
+                </el-select>
+            </el-form-item>
+
+
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+        </div>
+    </el-dialog>
+
+
+</div>
+<script>
+    var vm=new Vue({
+        el: '#app', //表示当前vue对象接管了div区域
+        data: {
+            total: 20,
+            size: 5,
+            page: 1,
+
+            dialogFormVisible:false,
+            formLabelWidth:'120px',
+            user: {id:'',name:'',password:''},
+            tableData: [{
+                id: '1',
+                name: '王小虎',
+                password: '123'
+            }, {
+                id: '2',
+                name: '王二虎',
+                password: '456'
+            }, {
+                id: '3',
+                name: '王三虎',
+                password: '654'
+            }, {
+                id: '4',
+                name: '王四虎',
+                password: '321'
+            }]
+        },
+        methods: {
+            add(){
+
+            },
+            handleEdit(index, row,column) {
+                console.log(row);
+                this.user=row;
+                this.dialogFormVisible=true;
+            },
+            handleDelete(index, row) {
+                console.log(index, row);
+                this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.tableData.splice(index,1)    /*index:开始位置的索引   count:要删除元素的个数*/
+                    this.$message({
+                        type: 'success',
+                        message: '删除成功!'
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            handleSizeChange(val) {
+                this.size=val;
+                console.log(`每页 ${val} 条`);
+            },
+            handleCurrentChange(val) {
+                this.page=val;
+                console.log(`当前页: ${val}`);
+            }
+
+        }
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>叫号管理</title>
+    <link th:include="comm/head :: copy"/>
+</head>
+<body style="margin: 1px">
+    <table id="dg" title="" class="easyui-datagrid"
+           fitColumns="true" pagination="true" rownumbers="true"
+           fit="true" toolbar="#tb"  striped="true">
+        <thead>
+        <th field="ss" width="20" align="center"checkbox="true"></th>
+        <th field="id" width="20" align="center" hidden="true">编号</th>
+        <th field="number" width="50" align="center">就诊号</th>
+        <th field="pname" width="50" align="center">患者姓名</th>
+        <th field="state" width="100" align="center">就诊状态</th>
+        </thead>
+    </table>
+    <div id="tb">
+        <div style="display: inline-block">
+            <a href="javascript:call()" class="easyui-linkbutton" style="background: red;margin: 30px;" plain="true">叫号</a>
+        </div>
+        <div style="display: inline-block">
+            <a href="javascript:jiuzheng()" class="easyui-linkbutton" style="background: #1bd5ff;margin: 20px;" plain="true">就诊</a>
+        </div>
+        <div style="display: inline-block">
+            <a href="javascript:pass()" class="easyui-linkbutton" style="background: #00ee00;margin: 20px;" plain="true">过号</a>
+        </div>
+        <div id="logInfo" style="display: inline-block;float: right;margin: 30px;font-size: medium">
+        </div>
+        <div id="showNumber" style="display:inline-block">
+            <p id="p1" style="display:inline-block;width:60px;margin-left:40px; margin-right:20px;">
+            </p>
+            <span id="s1"></span>
+            <p id="p2" style="display:inline-block;width:60px;margin-right:20px;">
+            </p>
+            <p id="p3" style="display:inline-block;width:60px;margin-right:20px;">
+            </p>
+            <!--当前就诊人-->
+            <p id="p4" style="display:inline-block;width:120px;margin-right:20px;" value="">
+            </p>
+            <span id="s4"></span>
+            <!--下一位就诊人-->
+            <p id="p5" style="display:inline-block;width:120px;margin-right:20px;" value="">
+            </p>
+        </div>
+    </div>
+</body>
+
+<script type="text/javascript">
+   //1.显示系统当前时间
+   function getCurDate() {
+       var d = new Date();
+       var week;
+       switch (d.getDay()){
+           case 1: week="星期一"; break;
+           case 2: week="星期二"; break;
+           case 3: week="星期三"; break;
+           case 4: week="星期四"; break;
+           case 5: week="星期五"; break;
+           case 6: week="星期六"; break;
+           default: week="星期天";
+       }
+       var years = d.getFullYear();
+       var month = add_zero(d.getMonth()+1);
+       var days = add_zero(d.getDate());
+       var hours = add_zero(d.getHours());
+       var minutes = add_zero(d.getMinutes());
+       var seconds=add_zero(d.getSeconds());
+       var ndate = years+"年"+month+"月"+days+"日 "+hours+":"+minutes+":"+seconds+" "+week;
+       var divT=document.getElementById("logInfo");
+       divT.innerHTML= ndate;
+   }
+   function add_zero(temp) {
+       if(temp<10) return "0"+temp;
+       else return temp;
+   }
+   setInterval("getCurDate()",100);
+   function add_zero(temp) {
+       if(temp<10) return "0"+temp;
+       else return temp;
+   }
+   setInterval("getCurDate()",100);
+
+    //2.页面加载完成
+    $(document).ready(function() {
+        /*页面加载获取该医生的所有挂号信息*/
+        getPatientList();
+        getWaitingNum();
+        getPassNum();
+        getFinishNum();
+    });
+    //2-1. 获取该医生下面的的所有患者信息
+   function getPatientList(){
+       $("#dg").datagrid({
+           url: "/doctor/call/list",
+           method: "get",
+       });
+   }
+    //3-1：获取等待人数 status=0
+   function  getWaitingNum() {
+        var status=0;
+       $.post("/doctor/call/getWaitingNum",{status:status},function(result){
+           if( result>=0 ){
+               console.log("result" + result);
+               $('#p1').html("等待中  "+result);
+           }else {
+               message(result.msg);
+           }
+       })
+   }
+   //3-2 获取过号人数: status=3
+   function getPassNum() {
+       var status=3; //过号人数状态为3
+       $.post("/doctor/call/getWaitingNum",{status:status},function(result){
+           if( result>=0 ){
+               $('#p2').html("过号  "+result);
+           }else {
+               message(result.msg);
+           }
+       })
+   }
+   //3-3 获取完成人数:status=2
+   function getFinishNum() {
+       var status=2;
+       $.post("/doctor/call/getWaitingNum",{status:status},function(result){
+           if( result>=0 ){
+               console.log("已就诊" + result);
+               $('#p3').html("已就诊  "+result);
+           }else {
+               message(result.msg);
+           }
+       });
+   }
+   //4.叫号
+   function call() {
+       var curpatientid=$("#p4").val();//当前就诊人id
+       var nextpatientid=$("#p5").val();//下一位就诊人id
+       var status=2;
+       $.post("/doctor/call/getCurAndNextPatient",{curpatientid:curpatientid,
+                                                    nextpatientid:nextpatientid,status:status},function(data){
+           if( data.rows.length==2 ){
+               $('#p4').html("当前呼叫  "+data.rows[0].pname);
+               $("#p4").val(data.rows[0].patientid);
+               $('#p5').html("下一位  "+data.rows[1].pname);
+               $("#p5").val(data.rows[1].patientid);
+           }else if(data.rows.length==1){
+               $('#p4').html("当前呼叫  "+data.rows[0].pname);
+               $("#p4").val(data.rows[0].patientid);
+               $('#p5').html("");
+           }else{
+               $('#p4').html("");
+               message("当前已是最后一位患者");
+           }
+       },"json");
+       getPatientList();
+       getWaitingNum();
+       getPassNum();
+       getFinishNum();
+   }
+
+
+   //4-2.过号： 点击过号  修改过号人状态 获得下一位就诊人信息
+   function pass(){
+       var curpatientid=$("#p4").val();//当前就诊人id
+       var nextpatientid=$("#p5").val();//下一位就诊人id
+       var status=3;//过好status修改为3
+       $.post("/doctor/call/getCurAndNextPatient",{curpatientid:curpatientid,
+           nextpatientid:nextpatientid,status:status},function(data){
+           if( data.rows.length>=0 ){
+               $('#p4').html("当前呼叫  "+data.rows[0].pname);
+               $("#p4").val(data.rows[0].patientid);
+               $('#p5').html("下一位  "+data.rows[1].pname);
+               $("#p5").val(data.rows[1].patientid);
+           }
+       },"json");
+       getPatientList();
+       getWaitingNum();
+       getPassNum();
+       getFinishNum();
+   }
+
+   //4-3.就诊: 病人进入科室，医生点击就诊： 患者状态修改为就诊中
+   function jiuzheng(){
+        //修改curpatient状态为1   就诊中
+       var curpatientid=$("#p4").val();//当前就诊人id
+       $.post("/doctor/call/update",{curpatientid:curpatientid},function(data){
+           console.log(data);
+           if( data.rows.length>=0 ){
+               $('#p4').html("当前就诊  "+data.rows[0].pname);
+           }
+       },"json");
+       getPatientList();
+       getWaitingNum();
+   }
+
+</script>
+</html>
